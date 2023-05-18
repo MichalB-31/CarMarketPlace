@@ -32,8 +32,10 @@ int main()
 int main()
 {
 	Table t1;
+	t1.create_table();
+	t1.add_row();
 	t1.read_from_table();
-	//zmiana 18.05.23 13:37
+	//zmiana 14:09
 
 }
 

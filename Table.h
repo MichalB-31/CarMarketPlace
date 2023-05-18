@@ -7,7 +7,7 @@ using namespace std;
 class Table
 {
 private:
-	string name = "users";
+	string name = "users"; //to trzeba zamienic na typ char prawdopodbnie bo ma problem potem odczytac, nie wiem czy spacji nie wstawia 
 public:
 	int create_table(); //Funkcja tworzaca nowa tabele w bazie danych, argument to nazwa tabeli 
 	int read_from_table(); //Odczytanie danych z tabeli - tylko trzeba tutaj podzielic bo raczej nie chcemy wszystkich informacji na raz

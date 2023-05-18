@@ -18,7 +18,7 @@ int Table::create_table()
 
 	//Instrukcje SQL do stworzenia nowej tabeli
 	string createTableSQL = "CREATE TABLE IF NOT EXISTS " + this->name + "("
-		"ID INT PRIMARY KEY NOT NULL,"
+		"ID INT PRIMARY KEY AUTOINCREMENT,"
 		"Name TEXT NOT NULL,"
 		"Surname TEXT NOT NULL,"
 		"Nickname TEXT MOT NULL,"
@@ -92,7 +92,7 @@ int Table::add_row()
 	}
 
 	//Kod SQL dodawania danych do wiersza
-	string insertSQL = "INSERT INTO " + name + " (ID, Name, Surname, Nickname, Email) VALUES(1, 'Mike', 'Tyson', 'MikeTTT', 'mike@gmail.com'); ";
+	string insertSQL = "INSERT INTO " + name + " (Name, Surname, Nickname, Email) VALUES('Mike', 'Tyson', 'MikeTTT', 'mike@gmail.com'); ";
 
 	//Wykonanie kodu SQL
 	result = sqlite3_exec(db, insertSQL.c_str(), nullptr, nullptr, &err);
