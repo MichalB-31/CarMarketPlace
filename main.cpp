@@ -2,6 +2,8 @@
 #include "sqlite/sqlite3.h"
 #include <string>
 #include "Table.h"
+#include "User.h"
+#include "Interface.h"
 using namespace std;
 
 /*
@@ -31,11 +33,8 @@ int main()
 
 int main()
 {
-	Table t1;
-	t1.create_table();
-	t1.add_row();
-	t1.read_from_table();
-	//zmiana 14:09
-
+	Interface i1;
+	i1.welcome();
+	i1.log_reg();
 }
 

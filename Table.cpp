@@ -9,7 +9,8 @@ int Table::create_table()
 
 
 	//Stworzenie lub otwarcie bazy danych:
-	int result = sqlite3_open((this->name+".db").c_str(), &db); //c_str() sie powtarza w kodzie bo funkcje z bibilioteki wymagaja uzycia typu char a nie string
+	string file_name = (this->table_name + ".db");
+	int result = sqlite3_open(file_name.c_str(), &db); //c_str() sie powtarza w kodzie bo funkcje z bibilioteki wymagaja uzycia typu char a nie string
 	if (result != SQLITE_OK)
 	{
 		cout << "Blad podczas otwierania bazy danych:" << sqlite3_errmsg(db) << endl;
@@ -17,8 +18,8 @@ int Table::create_table()
 	}
 
 	//Instrukcje SQL do stworzenia nowej tabeli
-	string createTableSQL = "CREATE TABLE IF NOT EXISTS " + this->name + "("
-		"ID INT PRIMARY KEY AUTOINCREMENT,"
+	string createTableSQL = "CREATE TABLE IF NOT EXISTS " + this->table_name + "("
+		"ID INTEGER PRIMARY KEY AUTOINCREMENT,"
 		"Name TEXT NOT NULL,"
 		"Surname TEXT NOT NULL,"
 		"Nickname TEXT MOT NULL,"
@@ -57,14 +58,15 @@ int Table::read_from_table()
 	sqlite3* db;
 	char* err = nullptr;
 
-	int result = sqlite3_open((name+".db").c_str(), &db);
+	string file_name = (this->table_name + ".db");
+	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK) {
 		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
 	//Kod SQL do wybrania wartosci z tabeli
-	string selectSQL = "SELECT * FROM "+ name + "; ";
+	string selectSQL = "SELECT * FROM "+ table_name + "; ";
 
 	//Wykonanie kodu SQL
 	result = sqlite3_exec(db, selectSQL.c_str(), callback, nullptr, &err);
@@ -78,13 +80,14 @@ int Table::read_from_table()
 	sqlite3_close(db);
 }
 
-int Table::add_row()
+int Table::add_row(string name, string surname, string nickname, string email)
 {
 	sqlite3* db;
 	char* err = nullptr;
 
 	//Otwarce bazy
-	int result = sqlite3_open(this->name.c_str(), &db);
+	string file_name = (this->table_name + ".db");
+	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
 		cout << "Blad podczas otwerania bazy danych: " << sqlite3_errmsg(db) << endl;
@@ -92,7 +95,7 @@ int Table::add_row()
 	}
 
 	//Kod SQL dodawania danych do wiersza
-	string insertSQL = "INSERT INTO " + name + " (Name, Surname, Nickname, Email) VALUES('Mike', 'Tyson', 'MikeTTT', 'mike@gmail.com'); ";
+	string insertSQL = "INSERT INTO " + table_name + " (Name, Surname, Nickname, Email) VALUES('"+name+"', '"+surname+"', '"+nickname+"', '"+email+"'); ";
 
 	//Wykonanie kodu SQL
 	result = sqlite3_exec(db, insertSQL.c_str(), nullptr, nullptr, &err);
@@ -115,7 +118,8 @@ int Table::delete_row(string id)
 	char* err = nullptr;
 
 	//Otwarcie bazy danych
-	int result = sqlite3_open(name.c_str(), &db);
+	string file_name = (this->table_name + ".db");
+	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
 		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
@@ -123,7 +127,7 @@ int Table::delete_row(string id)
 	}
 
 	//Kod SQL do usuniecia wiersza
-	string deleteSQL = "DELETE FROM Users WHERE ID = "+ id +";";
+	string deleteSQL = "DELETE FROM " + this->table_name + " WHERE ID = "+ id +"; ";
 
 	//Wykonanie kodu SQL
 	result = sqlite3_exec(db, deleteSQL.c_str(), nullptr, nullptr, &err);
