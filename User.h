@@ -9,15 +9,16 @@ using namespace std;
 class User //klasa ktora ma zapisac dane uzytkownika i je wrzucic do tabeli, mysle ze bedzie tu mocne polaczenie z klasa Table
 {
 private:
-	int id;
+	int id = 1;
 	string name;
 	string surname;
-	string nickname;
+	string login;
 	string email;
 	string password;
 public:
 	friend class Table;
-	void collect(Table &t);
+	User(Table& t);
+	//void collect(Table &t);
 };
 
 

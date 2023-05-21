@@ -33,8 +33,25 @@ int main()
 
 int main()
 {
+	Table t1;
 	Interface i1;
 	i1.welcome();
-	i1.log_reg();
+	int d = i1.log_reg();
+	if (d == 1)
+	{
+		t1.login_check("x", "y");
+	}
+	else
+	{
+		User u1(t1);
+	}
+	t1.read_from_table();
 }
+
+//Legenda jesli mozna to tak nazwac:
+
+//Table - klasa do obslugi zapytan SQL
+//Interface - typowo wyglad, staram sie zeby te funkcjonalnego wykonywala klasa User - niesty troche w siebie wchodza. Chodzi o to ze klasa Interface mam miec tylko funkcje wygladu.
+//User - przekazywanie wszystkiego co uzytkownikiem, pobieranie do bazy danych i przechowywanie atrybutow
+
 

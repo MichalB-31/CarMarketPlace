@@ -30,3 +30,13 @@ int Interface::log_reg()
 		log_reg();
 	}
 }
+
+void Interface::log()
+{
+	cout << "Wpisz login: ";
+}
+
+void Interface::reg()
+{
+	;
+}
