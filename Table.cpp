@@ -1,5 +1,10 @@
 #include "Table.h"
 
+
+Table::Table(string name)
+{
+	this->table_name = name;
+}
 int Table::create_table()
 {
 	//funkcja tworzaca nowa tabele jesli jeszcze jej nie ma
@@ -22,7 +27,8 @@ int Table::create_table()
 		"ID INTEGER PRIMARY KEY NULL,"
 		"Name TEXT NOT NULL,"
 		"Surname TEXT NOT NULL,"
-		"Login TEXT MOT NULL,"
+		"Login TEXT NOT NULL,"
+		"Password TEXT NOT NULL,"
 		"Email TEXT NOT NULL)";
 
 	//Wykonanie kodu SQL
@@ -81,7 +87,7 @@ int Table::read_from_table()
 	sqlite3_close(db);
 }
 
-int Table::add_row(int id, string name, string surname, string login, string email)
+int Table::add_row(int id, string name, string surname, string login,string password, string email)
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -96,7 +102,7 @@ int Table::add_row(int id, string name, string surname, string login, string ema
 	}
 
 	//Kod SQL dodawania danych do wiersza
-	string insertSQL = "INSERT INTO " + table_name + " (ID, Name, Surname, Login, Email) VALUES('1', '" + name + "', '" + surname + "', '" + login + "', '" + email + "'); "; //tutaj trzeba ogarnac ID
+	string insertSQL = "INSERT INTO " + table_name + " (ID, Name, Surname, Login, Password, Email) VALUES('1', '" + name + "', '" + surname + "', '" + login + "', '" + password + "', '" + email + "'); "; //tutaj trzeba ogarnac ID
 
 	//Wykonanie kodu SQL
 	result = sqlite3_exec(db, insertSQL.c_str(), nullptr, nullptr, &err);
@@ -145,6 +151,40 @@ int Table::delete_row(string id)
 	cout << "Wiersz usunito pomyœnie!" << endl;
 }
 
+
+int Table::login_check(string login, string password)
+{
+	// Odczytywanie danych z tabeli
+	sqlite3* db;
+	char* err = nullptr;
+
+	string file_name = (this->table_name + ".db");
+	int result = sqlite3_open(file_name.c_str(), &db);
+	if (result != SQLITE_OK) {
+		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		return result;
+	}
+
+	// Kod SQL do wybrania wartosci z tabeli
+	string selectSQL = "SELECT Login, Password FROM " + table_name + " WHERE Login = '" + login + "' AND Password = '" + password + "';";
+
+	// Wykonanie kodu SQL
+	result = sqlite3_exec(db, selectSQL.c_str(), nullptr, nullptr, &err);
+	if (result != SQLITE_OK)
+	{
+		cout << "Nie znaleziono uzytkownika: " << err << endl;
+		sqlite3_free(err);
+		return result;
+	}
+	else
+	{
+		cout << "Zalogowano!" << endl;
+	}
+
+	sqlite3_close(db);
+}
+
+/*
 int Table::login_check(string login, string password)
 {
 	//Odczytywanie danych z tabeli
@@ -171,4 +211,4 @@ int Table::login_check(string login, string password)
 	}
 
 	sqlite3_close(db);
-}
+}*/

@@ -33,19 +33,22 @@ int main()
 
 int main()
 {
-	Table t1;
+	Table t1("usersv3");
+	t1.create_table();
 	Interface i1;
 	i1.welcome();
 	int d = i1.log_reg();
-	if (d == 1)
+	if (d == 1) //1 - logowanie, 2 - rejestracja
 	{
-		t1.login_check("x", "y");
+		i1.log(t1);
 	}
 	else
 	{
-		User u1(t1);
+		i1.reg();
+		//User u1(t1);
 	}
-	t1.read_from_table();
+	i1.menu();
+	
 }
 
 //Legenda jesli mozna to tak nazwac:
