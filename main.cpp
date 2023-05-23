@@ -2,6 +2,8 @@
 #include "sqlite/sqlite3.h"
 #include <string>
 #include "Table.h"
+#include "User.h"
+#include "Interface.h"
 using namespace std;
 
 /*
@@ -31,9 +33,28 @@ int main()
 
 int main()
 {
-	Table t1;
-	t1.read_from_table();
-	//zmiana 18.05.23 13:37
-
+	Table t1("usersv3");
+	t1.create_table();
+	Interface i1;
+	i1.welcome();
+	int d = i1.log_reg();
+	if (d == 1) //1 - logowanie, 2 - rejestracja
+	{
+		i1.log(t1);
+	}
+	else
+	{
+		i1.reg();
+		//User u1(t1);
+	}
+	i1.menu();
+	
 }
+
+//Legenda jesli mozna to tak nazwac:
+
+//Table - klasa do obslugi zapytan SQL
+//Interface - typowo wyglad, staram sie zeby te funkcjonalnego wykonywala klasa User - niesty troche w siebie wchodza. Chodzi o to ze klasa Interface mam miec tylko funkcje wygladu.
+//User - przekazywanie wszystkiego co uzytkownikiem, pobieranie do bazy danych i przechowywanie atrybutow
+
 
