@@ -10,11 +10,11 @@ void Interface::welcome()
 int Interface::log_reg()
 {
 	
-	cout << "Chce sie zalogowac (nacisnij 1 + enter)                    Jestem tu pierwszy raz (nacisnij 2 + enter)" << endl;
+	cout << "Chce sie zalogowac (1 + ENTER)                Jestem tu pierwszy raz (2 + ENTER)          Zamknij program (3 + ENTER)"<< endl;
 	try { //kod zeby zlapac jezeli uzytkownik poda cos innego niz 1 lub 2
 		int decision{};
 		cin >> decision;
-		if (decision == 1 || decision == 2)
+		if (decision == 1 || decision == 2 || decision == 3)
 		{
 			system("cls");
 			return decision;
@@ -111,19 +111,64 @@ void Interface::reg(Table &t, User &u)
 	Sleep(3000);
 }
 
-void Interface::profile()
+int Interface::add_car(Table& t, Table& c, User& u)
 {
+	string make{}, model{}, year{}, mileage{}, body{};
 	system("cls");
-	cout << "Imie: " << endl;
-	cout << "Nazwisko: " << endl;
-	cout << "Login: " << endl;
-	cout << "Adres email: " << endl;
+	cout << "Podaj marke: ";
+	cin >> make;
+	cout << "Podaj model: ";
+	cin >> model;
+	cout << "Podaj rocznik: ";
+	cin >> year;
+	cout << "Podaj przebieg: ";
+	cin >> mileage;
+	cout << "Podaj rodzaj nadwozia: ";
+	cin >> body;
+	c.car_add_row(to_string(u.id), make, model, year, mileage, body, "1");
+	Sleep(3000);
+	return 0;
+}
+
+int Interface::profile(Table &t, Table &c, User& u)
+{
+	int decision{};
+	system("cls");
+	t.read_from_table(u,'u');
 	cout << endl;
 	cout << "====================" << endl;
 	cout << endl;
-	cout << "Dodaj pojazd: " << endl;
+	cout << "Wplac srodki [1 + ENTER]" << endl;
+	cout << "Wyplac srodki [2 + ENTER]\n" << endl;
+	cout << "====================" << endl;
+	cout << endl;
+	cout << "Dodaj pojazd [3 + ENTER]\n " << endl;
+	cout << "====================\n" << endl;
+	cout << "Powrot do menu [4 + ENTER]" << endl;
+
+	cout << "\nTwoje pojazdy:\n";
+	c.read_from_table(u, 'c');
+	cin >> decision;
+	if (decision == 1)
+	{
+		;
+	}
+	else if (decision == 2)
+	{
+		;
+	}
+	else if (decision == 3)
+	{
+		add_car(t,c,u);
+	}
+	else if (decision == 4)
+	{
+		menu(t,c, u);
+	}
+	return 0;
 }
-void Interface::menu()
+
+int Interface::menu(Table &t,Table &c, User& u)
 {
 	int decision{};
 	system("cls");
@@ -131,12 +176,16 @@ void Interface::menu()
 	cout << "---MOJ PROFIL---" << " (1 + ENTER) " << endl;
 	cout << "---Przegladaj pojazdy---" << " (2 + ENTER) " << endl;
 	cout << "---Zakoncz---" << " (3 + ENTER) " << endl;
-	try { //kod zeby zlapac jezeli uzytkownik poda cos innego niz 1 lub 2 lub 3
+	try { 
 		cin >> decision;
 		if (decision == 1)
 		{
-			profile();
+			profile(t,c,u);
 			system("cls");
+		}
+		else if(decision == 3)
+		{
+			return 0;
 		}
 		else
 		{
@@ -149,6 +198,6 @@ void Interface::menu()
 		cout << "Nieprawidlowa decyzja" << endl;
 		Sleep(1000);
 		system("cls");
-		menu();
+		menu(t,c,u);
 	}
 }

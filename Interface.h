@@ -13,8 +13,10 @@ public:
 	int log_reg(); //strona logowania oraz rejestracji, zwraca 1 lub 2 i w zaleznosci od tego bedzie dalej logowanie lub rejestracja
 	void log(Table &t, User& u); //strona obslugujaca logowanie i przekazujaca parametry do sprawdzenia
 	void reg(Table &t, User& u); //strona do rejestracji i przekazujaca parametry do sprawdzenia, nastepenie wywolanie funkcji do logowania
-	void menu(); //strona po zalogowaniu
-	void profile();
+	int menu(Table &t, Table& c, User& u); //strona po zalogowaniu
+	int profile(Table& t,Table &c, User& u);
+	int add_car(Table& t,Table& c, User& u);
+	
 
 	friend class User;
 };
