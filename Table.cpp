@@ -24,7 +24,7 @@ int Table::create_table()
 		return result;
 	}
 
-	string createTableSQL = {};
+	string createTableSQL;
 	//Instrukcje SQL do stworzenia nowej tabeli
 	if (whichTable == "Users") //U poniewaz tabela dla uzytkownikow
 	{
@@ -40,11 +40,13 @@ int Table::create_table()
 	{
 		createTableSQL = "CREATE TABLE IF NOT EXISTS " + this->tableName + "("
 			"ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+			"OwnerID INTEGER NOT NULL,"
 			"Make TEXT NOT NULL,"
 			"Model TEXT NOT NULL,"
 			"Year TEXT NOT NULL,"
 			"Mileage TEXT NOT NULL,"
-			"Body TEXT NOT NULL)";
+			"Body TEXT NOT NULL,"
+			"ForSale INTEGER NOT NULL)";
 	}
 	//Wykonanie kodu SQL
 	result = sqlite3_exec(db, createTableSQL.c_str(), nullptr, nullptr, &err);
@@ -60,7 +62,7 @@ int Table::create_table()
 	cout << "Tabela stworzona pomyslnie!" << endl;
 }
 
-int callback(void* data, int argc, char** argv, char** azColName)
+int callbackUser(void* data, int argc, char** argv, char** azColName)
 {
 	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej 
 	for (int i = 0; i < argc; i++)
@@ -74,9 +76,21 @@ int callback(void* data, int argc, char** argv, char** azColName)
 	return 0;
 }
 
+int callbackCar(void* data, int argc, char** argv, char** azColName)
+{
+	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej 
+	for (int i = 0; i < argc; i++)
+	{
+		if (i == 0 || i == 2 || i == 3 || i == 4 || i == 5)
+		{
+			cout << azColName[i] << ": " << argv[i] << endl;
+		}
+	}
+	cout << endl;
+	return 0;
+}
 
-
-int Table::read_from_table(User& u)
+int Table::read_from_table(User& u, char type)
 {
 	//Odczytywanie danych z tabeli
 	sqlite3* db;
@@ -84,16 +98,26 @@ int Table::read_from_table(User& u)
 
 	string file_name = "CarMarket.db";
 	int result = sqlite3_open(file_name.c_str(), &db);
-	if (result != SQLITE_OK) {
+	if (result != SQLITE_OK) 
+	{
 		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
-	//Kod SQL do wybrania wartosci z tabeli
-	string selectSQL = "SELECT * FROM " + tableName + " WHERE Login = "+ u.login +"; ";
+	//Kod SQL do wybrania wartosci z tabeli <--------------------------------DO ZMIANY
+	string selectSQL;
+	if (type == 'u')
+	{
+		selectSQL = "SELECT * FROM " + tableName + " WHERE ID = " + to_string(u.id) + "; ";
+		result = sqlite3_exec(db, selectSQL.c_str(), callbackUser, nullptr, &err);
+	}
+	else if (type == 'c')
+	{
+		selectSQL = "SELECT * FROM " + tableName + " WHERE OwnerID = " + to_string(u.id) + "; ";
+		result = sqlite3_exec(db, selectSQL.c_str(), callbackCar, nullptr, &err);
+	}
 
 	//Wykonanie kodu SQL
-	result = sqlite3_exec(db, selectSQL.c_str(), callback, nullptr, &err);
 	if (result != SQLITE_OK)
 	{
 		cout << "Blad podczas wybierania wartosci " << err << endl;
@@ -103,7 +127,6 @@ int Table::read_from_table(User& u)
 
 	sqlite3_close(db);
 }
-
 
 int Table::read_from_table_TEST()
 {
@@ -122,7 +145,7 @@ int Table::read_from_table_TEST()
 	string selectSQL = "SELECT * FROM "+ tableName + "; ";
 
 	//Wykonanie kodu SQL
-	result = sqlite3_exec(db, selectSQL.c_str(), callback, nullptr, &err);
+	result = sqlite3_exec(db, selectSQL.c_str(), callbackUser, nullptr, &err);
 	if (result != SQLITE_OK)
 	{
 		cout << "Blad podczas wybierania wartosci " << err << endl;
@@ -260,7 +283,7 @@ int Table::add_row(string name, string surname, string login, string password, s
 	return 1;
 }
 
-int Table::car_add_row(string make, string model, string year, string mileage, string body)
+int Table::car_add_row(string ownerID, string make, string model, string year, string mileage, string body, string forSale)
 {
 	sqlite3* db;
 	sqlite3_stmt* stmt;
@@ -274,7 +297,7 @@ int Table::car_add_row(string make, string model, string year, string mileage, s
 	}
 
 	// Dodanie wiersza jesli nie ma takiego uzytkownika
-	string insertSQL = "INSERT INTO " + tableName + " (Make, Model, Year, Mileage, Body) VALUES (?, ?, ?, ?, ?)";
+	string insertSQL = "INSERT INTO " + tableName + " (OwnerID, Make, Model, Year, Mileage, Body, ForSale) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	result = sqlite3_prepare_v2(db, insertSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK)
 	{
@@ -284,11 +307,13 @@ int Table::car_add_row(string make, string model, string year, string mileage, s
 	}
 
 	// Ustawienie parametrów z danymi
-	result = sqlite3_bind_text(stmt, 1, make.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 2, model.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 3, year.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 4, mileage.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 5, body.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 1, ownerID.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 2, make.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 3, model.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 4, year.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 5, mileage.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 6, body.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 7, forSale.c_str(), -1, SQLITE_STATIC);
 
 
 	// Wykonanie zapytania
@@ -398,6 +423,59 @@ bool Table::login_check(const string& username, const string& password)
 	return false;
 }
 
+int Table::get_id_from_login(const string& login, int& id)
+{
+	sqlite3* db;
+	sqlite3_stmt* stmt;
+
+	string file_name = "CarMarket.db";
+	int result = sqlite3_open(file_name.c_str(), &db);
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		return result;
+	}
+
+	string selectSQL = "SELECT ID FROM " + this->tableName + " WHERE Login = ?";
+	result = sqlite3_prepare_v2(db, selectSQL.c_str(), -1, &stmt, nullptr);
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas przygotowywania zapytania: " << sqlite3_errmsg(db) << endl;
+		sqlite3_close(db);
+		return result;
+	}
+
+	result = sqlite3_bind_text(stmt, 1, login.c_str(), -1, SQLITE_STATIC);
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas ustawiania parametru loginu: " << sqlite3_errmsg(db) << endl;
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		return result;
+	}
+
+	result = sqlite3_step(stmt);
+	if (result == SQLITE_ROW)
+	{
+		id = sqlite3_column_int(stmt, 0);
+	}
+	else if (result == SQLITE_DONE)
+	{
+		cout << "Uzytkownik o podanym loginie nie istnieje." << endl;
+	}
+	else
+	{
+		cout << "Blad podczas wykonywania zapytania: " << sqlite3_errmsg(db) << endl;
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		return result;
+	}
+
+	sqlite3_finalize(stmt);
+	sqlite3_close(db);
+
+	return 0;
+}
 
 
 

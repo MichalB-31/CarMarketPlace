@@ -18,7 +18,7 @@ public:
 	string email;
 
 	friend class Table;
-	User(Table& t);
+	
 	//void collect(Table &t);
 };
 
