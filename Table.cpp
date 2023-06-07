@@ -46,6 +46,7 @@ int Table::create_table()
 			"Year TEXT NOT NULL,"
 			"Mileage TEXT NOT NULL,"
 			"Body TEXT NOT NULL,"
+			"Price INTEGER NOT NULL,"
 			"ForSale INTEGER NOT NULL)";
 	}
 	//Wykonanie kodu SQL
@@ -65,32 +66,42 @@ int Table::create_table()
 int callbackUser(void* data, int argc, char** argv, char** azColName)
 {
 	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej 
-	for (int i = 0; i < argc; i++)
-	{
-		if (i == 1 || i == 2 || i == 3 || i == 5)
-		{
-			cout << azColName[i] << ": " << argv[i] << endl;
-		}
-	}
+	cout << "Twoje dane: " << endl;
+	cout << "Imie: " << argv[1] << endl;
+	cout << "Nazwsiko: " << argv[2] << endl;
+	cout << "Nazwa uzytkownika: " << argv[3] << endl;
+	cout << "Adres email: " << argv[5] << endl;
+
 	cout << endl;
 	return 0;
 }
 
-int callbackCar(void* data, int argc, char** argv, char** azColName)
+int callbackSale(void* data, int argc, char** argv, char** azColName)
 {
 	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej 
-	for (int i = 0; i < argc; i++)
-	{
-		if (i == 0 || i == 2 || i == 3 || i == 4 || i == 5)
-		{
-			cout << azColName[i] << ": " << argv[i] << endl;
-		}
-	}
+	cout << "ID Pojazdu: " << argv[0] << endl;
+	cout << argv[2] << " " << argv[3] << " rok " << argv[4] << endl;
+	cout << "Przebieg: " << argv[5] << "km , nadwozie " << argv[6] << endl;
+	cout << "Cena: " << argv[7] << " zl" << endl;
+
+	cout << "===========" << endl;
+	return 0;
+}
+
+int callbackProfile(void* data, int argc, char** argv, char** azColName)
+{
+	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej 
+	cout << argv[2];
+	cout << " ";
+	cout << argv[3];
+	cout << ", rok ";
+	cout << argv[4];
+		
 	cout << endl;
 	return 0;
 }
 
-int Table::read_from_table(User& u, char type)
+int Table::read_from_table(User& u, string type)// type u - uzytkownik, cp - carprofile, cs - carsale, co - cars owned
 {
 	//Odczytywanie danych z tabeli
 	sqlite3* db;
@@ -106,15 +117,20 @@ int Table::read_from_table(User& u, char type)
 
 	//Kod SQL do wybrania wartosci z tabeli <--------------------------------DO ZMIANY
 	string selectSQL;
-	if (type == 'u')
+	if (type == "u")
 	{
 		selectSQL = "SELECT * FROM " + tableName + " WHERE ID = " + to_string(u.id) + "; ";
 		result = sqlite3_exec(db, selectSQL.c_str(), callbackUser, nullptr, &err);
 	}
-	else if (type == 'c')
+	else if (type == "cp")
 	{
 		selectSQL = "SELECT * FROM " + tableName + " WHERE OwnerID = " + to_string(u.id) + "; ";
-		result = sqlite3_exec(db, selectSQL.c_str(), callbackCar, nullptr, &err);
+		result = sqlite3_exec(db, selectSQL.c_str(), callbackProfile, nullptr, &err);
+	}
+	else if (type == "cs")
+	{
+		selectSQL = "SELECT * FROM " + tableName + " WHERE ForSale = 1;";
+		result = sqlite3_exec(db, selectSQL.c_str(), callbackSale, nullptr, &err);
 	}
 
 	//Wykonanie kodu SQL
@@ -283,7 +299,7 @@ int Table::add_row(string name, string surname, string login, string password, s
 	return 1;
 }
 
-int Table::car_add_row(string ownerID, string make, string model, string year, string mileage, string body, string forSale)
+int Table::car_add_row(string ownerID, string make, string model, string year, string mileage, string body, string price, string forSale)
 {
 	sqlite3* db;
 	sqlite3_stmt* stmt;
@@ -297,7 +313,7 @@ int Table::car_add_row(string ownerID, string make, string model, string year, s
 	}
 
 	// Dodanie wiersza jesli nie ma takiego uzytkownika
-	string insertSQL = "INSERT INTO " + tableName + " (OwnerID, Make, Model, Year, Mileage, Body, ForSale) VALUES (?, ?, ?, ?, ?, ?, ?)";
+	string insertSQL = "INSERT INTO " + tableName + " (OwnerID, Make, Model, Year, Mileage, Body, Price, ForSale) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 	result = sqlite3_prepare_v2(db, insertSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK)
 	{
@@ -313,7 +329,8 @@ int Table::car_add_row(string ownerID, string make, string model, string year, s
 	result = sqlite3_bind_text(stmt, 4, year.c_str(), -1, SQLITE_STATIC);
 	result = sqlite3_bind_text(stmt, 5, mileage.c_str(), -1, SQLITE_STATIC);
 	result = sqlite3_bind_text(stmt, 6, body.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 7, forSale.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 7, price.c_str(), -1, SQLITE_STATIC);
+	result = sqlite3_bind_text(stmt, 8, forSale.c_str(), -1, SQLITE_STATIC);
 
 
 	// Wykonanie zapytania
@@ -475,6 +492,100 @@ int Table::get_id_from_login(const string& login, int& id)
 	sqlite3_close(db);
 
 	return 0;
+}
+
+int Table::modify_row(int id, double price)
+{
+	//Odczytywanie danych z tabeli
+	sqlite3* db;
+	char* err = nullptr;
+
+	string file_name = "CarMarket.db";
+	int result = sqlite3_open(file_name.c_str(), &db);
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		return result;
+	}
+
+	//Kod SQL do wybrania wartosci z tabeli
+	
+	string selectSQL = "UPDATE " + tableName + " SET Price = " + to_string(price) +", ForSale = 1 " + " WHERE ID = " + to_string(id) + "; ";
+	result = sqlite3_exec(db, selectSQL.c_str(), nullptr, nullptr, &err);
+	
+	
+
+	//Wykonanie kodu SQL
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas wykonywania zadania" << err << endl;
+		sqlite3_free(err);
+		return result;
+	}
+
+	sqlite3_close(db);
+}
+
+int Table::modify_owner(User &u, int id)
+{
+	//Odczytywanie danych z tabeli
+	sqlite3* db;
+	char* err = nullptr;
+
+	string file_name = "CarMarket.db";
+	int result = sqlite3_open(file_name.c_str(), &db);
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		return result;
+	}
+
+	//Kod SQL do wybrania wartosci z tabeli
+
+	string selectSQL = "UPDATE " + tableName + " SET OwnerID = " + to_string(u.id) + " WHERE ID = " + to_string(id) + "; ";
+	result = sqlite3_exec(db, selectSQL.c_str(), nullptr, nullptr, &err);
+
+
+
+	//Wykonanie kodu SQL
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas wykonywania zadania" << err << endl;
+		sqlite3_free(err);
+		return result;
+	}
+}
+
+int Table::show_cars_for_sale()
+{
+	//Odczytywanie danych z tabeli
+	sqlite3* db;
+	char* err = nullptr;
+
+	string file_name = "CarMarket.db";
+	int result = sqlite3_open(file_name.c_str(), &db);
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		return result;
+	}
+
+	//Kod SQL do wybrania wartosci z tabeli <--------------------------------DO ZMIANY
+
+	string selectSQL = "SELECT * FROM " + tableName + " WHERE ForSale = 1;";
+
+	result = sqlite3_exec(db, selectSQL.c_str(), callbackSale, nullptr, &err);
+	
+	 
+	//Wykonanie kodu SQL
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas wybierania wartosci " << err << endl;
+		sqlite3_free(err);
+		return result;
+	}
+
+	sqlite3_close(db);
 }
 
 

@@ -113,6 +113,7 @@ void Interface::reg(Table &t, User &u)
 
 int Interface::add_car(Table& t, Table& c, User& u)
 {
+	char decision;
 	string make{}, model{}, year{}, mileage{}, body{};
 	system("cls");
 	cout << "Podaj marke: ";
@@ -125,16 +126,82 @@ int Interface::add_car(Table& t, Table& c, User& u)
 	cin >> mileage;
 	cout << "Podaj rodzaj nadwozia: ";
 	cin >> body;
-	c.car_add_row(to_string(u.id), make, model, year, mileage, body, "1");
+	cout << "Czy potwerdzasz wprowadzone dane? [t/n]";
+	cin >> decision;
+	if (decision == 'n' || decision == 'N')
+	{
+		return 0;
+	}
+	c.car_add_row(to_string(u.id), make, model, year, mileage, body, "0", "0");
 	Sleep(3000);
 	return 0;
+}
+
+int Interface::car_for_sale(Table& t, Table& c, User& u)
+{
+	int carID;
+	double price;
+	system("cls");
+	cout << "Wyjscie [0 + ENTER]" << endl;
+	cout << "Wyberz ktory pojazd chcesz chcesz wystawic na sprzedaz [NUMER + ENTER]" << endl;
+	c.read_from_table(u, "co");
+	cin >> carID;
+	if (carID == 0)
+	{
+		return 0;
+	}
+	cout << "Podaj cene samochodu: ";
+	cin >> price;
+	c.modify_row(carID, price);
+	cout << "Pojazd wystawiony na sprzedaz!" << endl;
+	Sleep(3000);
+	system("cls");
+	return 0;
+}
+
+int Interface::show_cars(Table& t, Table& c, User& u)
+{
+	int decision;
+	cout << "Jezeli chcesz dokonac zakupu, wpisz: NUMER ID + ENTER. Wyjscie: 0 + ENTER" << endl << endl;
+	cout << "===========" << endl;
+	c.read_from_table(u, "cs");
+	cout << endl;
+	cin >> decision;
+	if (!decision)
+	{
+		return 0;
+	}
+	//check price with balances
+	c.modify_owner(u, decision);
+}
+
+int Interface::deposit(User& u)
+{
+	double dep{};
+	while (true)
+	{
+		system("cls");
+		cout << "Wpisz zadana kowte do wplaty: ";
+		cin >> dep;
+		if (dep > 0)
+		{
+			u.balance += dep;
+			break;
+		}
+		else
+		{
+			cout << "Nieprawidlowa wartosc!" << endl;
+		}
+	}
 }
 
 int Interface::profile(Table &t, Table &c, User& u)
 {
 	int decision{};
 	system("cls");
-	t.read_from_table(u,'u');
+	t.read_from_table(u,"u");
+	cout << "\nTwoje pojazdy:\n";
+	c.read_from_table(u, "cp");
 	cout << endl;
 	cout << "====================" << endl;
 	cout << endl;
@@ -144,10 +211,10 @@ int Interface::profile(Table &t, Table &c, User& u)
 	cout << endl;
 	cout << "Dodaj pojazd [3 + ENTER]\n " << endl;
 	cout << "====================\n" << endl;
-	cout << "Powrot do menu [4 + ENTER]" << endl;
+	cout << "Wystaw dodany pojazd na sprzedaz pojazd [4 + ENTER]\n " << endl;
+	cout << "====================\n" << endl;
+	cout << "Powrot do menu [5 + ENTER]" << endl;
 
-	cout << "\nTwoje pojazdy:\n";
-	c.read_from_table(u, 'c');
 	cin >> decision;
 	if (decision == 1)
 	{
@@ -163,41 +230,53 @@ int Interface::profile(Table &t, Table &c, User& u)
 	}
 	else if (decision == 4)
 	{
-		menu(t,c, u);
+		car_for_sale(t, c, u);
 	}
-	return 0;
+	else if (decision == 5)
+	{
+		return 0;
+	}
+	profile(t, c, u);
 }
 
 int Interface::menu(Table &t,Table &c, User& u)
 {
 	int decision{};
-	system("cls");
-	cout << "===MENU===" << endl << endl;
-	cout << "---MOJ PROFIL---" << " (1 + ENTER) " << endl;
-	cout << "---Przegladaj pojazdy---" << " (2 + ENTER) " << endl;
-	cout << "---Zakoncz---" << " (3 + ENTER) " << endl;
-	try { 
-		cin >> decision;
-		if (decision == 1)
-		{
-			profile(t,c,u);
-			system("cls");
-		}
-		else if(decision == 3)
-		{
-			return 0;
-		}
-		else
-		{
-			throw (decision);
-		}
-	}
-	catch (int dec)
+	while (true)
 	{
 		system("cls");
-		cout << "Nieprawidlowa decyzja" << endl;
-		Sleep(1000);
-		system("cls");
-		menu(t,c,u);
+		cout << "===MENU===" << endl << endl;
+		cout << "---MOJ PROFIL---" << " (1 + ENTER) " << endl;
+		cout << "---Przegladaj pojazdy---" << " (2 + ENTER) " << endl;
+		cout << "---Zakoncz---" << " (3 + ENTER) " << endl;
+		try {
+			cin >> decision;
+			if (decision == 1)
+			{
+				profile(t, c, u);
+				system("cls");
+			}
+			else if (decision == 2)
+			{
+				system("cls");
+				show_cars(t, c, u);
+			}
+			else if (decision == 3)
+			{
+				break;
+			}
+			else
+			{
+				throw (decision);
+			}
+		}
+		catch (int dec)
+		{
+			system("cls");
+			cout << "Nieprawidlowa decyzja" << endl;
+			Sleep(1000);
+			system("cls");
+			menu(t, c, u);
+		}
 	}
 }
