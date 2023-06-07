@@ -22,7 +22,11 @@ int main()
 	//t1.get_id_from_login(u1.login, u1.id);
 	//i1.profile(t1,c1, u1);
 	i1.menu(t1,c1,u1);
-	c1.read_from_table_TEST();
+	//c1.read_from_table_TEST();
+	double price{};
+	price = c1.getPriceFromTableRow(1);
+	cout << price;
+
 	return 0;
 	
 
@@ -63,6 +67,13 @@ int main()
 
 		
 }
+//Przerobvienie funkcji get_price
+//Zabezpieczenie zeby nie bylo mozliwe kupienie swojego wlasnego samochodu
+//Dopisanie srodkow na koncie do bazy danych 
+//Usuniecie ogloszenia
+//Usuniecie calkowite samochodu z serwisu
+//Upiekszenie kodu
+
 
 //Legenda jesli mozna to tak nazwac:
 

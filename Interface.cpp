@@ -162,6 +162,8 @@ int Interface::car_for_sale(Table& t, Table& c, User& u)
 int Interface::show_cars(Table& t, Table& c, User& u)
 {
 	int decision;
+	char finalDecision;
+	double price;
 	cout << "Jezeli chcesz dokonac zakupu, wpisz: NUMER ID + ENTER. Wyjscie: 0 + ENTER" << endl << endl;
 	cout << "===========" << endl;
 	c.read_from_table(u, "cs");
@@ -171,8 +173,27 @@ int Interface::show_cars(Table& t, Table& c, User& u)
 	{
 		return 0;
 	}
-	//check price with balances
-	c.modify_owner(u, decision);
+	else
+	{
+		price = c.getPriceFromTableRow(decision);
+		if (u.balance >= price)
+		{
+			cout << "Czy chcesz potwierdzic zakup? [t/n]";
+			cin >> finalDecision;
+			if (finalDecision == 'T' || finalDecision == 't')
+			{
+				cout << "Dokonano zakupu!";
+				c.modify_owner(u, decision);
+				u.balance = -price;
+				Sleep(3000);
+			}
+		}
+		else
+		{
+			cout << "Za malo srodkow na koncie!" << endl;
+		}
+	}
+	Sleep(3000);
 }
 
 int Interface::deposit(User& u)
@@ -181,18 +202,46 @@ int Interface::deposit(User& u)
 	while (true)
 	{
 		system("cls");
-		cout << "Wpisz zadana kowte do wplaty: ";
+		cout << "Wpisz zadana kwote do wplaty: ";
 		cin >> dep;
 		if (dep > 0)
 		{
 			u.balance += dep;
+			cout << "Dokonano wplaty. Aktualny stan srodkow: " << u.balance <<"zl"<< endl;
+			Sleep(3000);
 			break;
 		}
 		else
 		{
 			cout << "Nieprawidlowa wartosc!" << endl;
+			Sleep(3000);
 		}
 	}
+	return 0;
+}
+
+int Interface::withdraw(User& u)
+{
+	double with;
+	while (true)
+	{
+		system("cls");
+		cout << "Wpisz kwote jaka chcesz wyplacic: ";
+		cin >> with;
+		if (u.balance > with)
+		{
+			u.balance -= with;
+			cout << "Dokonano wyplaty. Aktualny stan srodkow: " << u.balance << "zl" << endl;
+			Sleep(3000);
+			break;
+		}
+		else
+		{
+			cout << "Nieprawidlowa wartosc!" << endl;
+			Sleep(3000);
+		}
+	}
+	return 0;
 }
 
 int Interface::profile(Table &t, Table &c, User& u)
@@ -218,11 +267,11 @@ int Interface::profile(Table &t, Table &c, User& u)
 	cin >> decision;
 	if (decision == 1)
 	{
-		;
+		deposit(u);
 	}
 	else if (decision == 2)
 	{
-		;
+		withdraw(u);
 	}
 	else if (decision == 3)
 	{

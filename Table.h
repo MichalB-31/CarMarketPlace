@@ -35,6 +35,8 @@ public:
 
 	int modify_owner(User& u,int id);
 
+	double get_price(int rowID); //do zmiany
+
 };
 
 

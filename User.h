@@ -16,7 +16,7 @@ public:
 	//string surname;
 	string login;
 	//string email;
-	double balance;
+	double balance = 0;
 
 	friend class Table;
 	

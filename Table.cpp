@@ -83,7 +83,7 @@ int callbackSale(void* data, int argc, char** argv, char** azColName)
 	cout << argv[2] << " " << argv[3] << " rok " << argv[4] << endl;
 	cout << "Przebieg: " << argv[5] << "km , nadwozie " << argv[6] << endl;
 	cout << "Cena: " << argv[7] << " zl" << endl;
-
+ 
 	cout << "===========" << endl;
 	return 0;
 }
@@ -589,5 +589,46 @@ int Table::show_cars_for_sale()
 }
 
 
+double Table::get_price(int id) //do zmodyfikowania
+{
+	double price = 0.0;
 
+	sqlite3* db;
+	char* err = nullptr;
 
+	string file_name = "CarMarket.db";
+	int result = sqlite3_open(file_name.c_str(), &db);
+	if (result != SQLITE_OK)
+	{
+		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		return result;
+	}
+	
+	string selectSQL = "SELECT * FROM " + tableName + " WHERE ID = " + to_string(id) + ";";
+
+	
+	result = sqlite3_exec(db, selectSQL.c_str(), [](void* data, int columnCount, char** columnValues, char** columnNames) {
+		double* pricePtr = static_cast<double*>(data);
+		if (columnCount >= 8)
+		{
+			try
+			{
+				*pricePtr = std::stod(columnValues[7]);  
+			}
+			catch (const std::exception& e)
+			{
+				std::cout << "Error converting price: " << e.what() << std::endl;
+			}
+		}
+		return 0;
+		}, &price, nullptr);
+
+	if (result != SQLITE_OK)
+	{
+		std::cout << "Error executing SELECT statement: " << sqlite3_errmsg(db) << std::endl;
+	}
+
+	return price;
+}
+
+	

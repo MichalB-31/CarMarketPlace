@@ -20,7 +20,7 @@ public:
 	int show_cars(Table& t, Table& c, User& u);
 
 	int deposit(User& u);
-	
+	int withdraw(User& u);
 
 	friend class User;
 };
