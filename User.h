@@ -12,10 +12,11 @@ private:
 	
 public:
 	int id;
-	string name;
-	string surname;
+	//string name;
+	//string surname;
 	string login;
-	string email;
+	//string email;
+	double balance = 0;
 
 	friend class Table;
 	

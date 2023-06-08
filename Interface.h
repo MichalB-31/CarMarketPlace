@@ -16,7 +16,11 @@ public:
 	int menu(Table &t, Table& c, User& u); //strona po zalogowaniu
 	int profile(Table& t,Table &c, User& u);
 	int add_car(Table& t,Table& c, User& u);
-	
+	int car_for_sale(Table& t, Table& c, User& u);
+	int show_cars(Table& t, Table& c, User& u);
+
+	int deposit(User& u);
+	int withdraw(User& u);
 
 	friend class User;
 };
