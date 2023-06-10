@@ -10,65 +10,58 @@ using namespace std;
 
 int main()
 {
-	
-	Table t1("users", "Users");
-	Table c1("cars03", "Cars");
-	t1.create_table();
-	c1.create_table();
+	string userTableName = "Users";
+	string carTableName = "Cars";
+	Table t1(userTableName, userTableName);
+	Table c1(carTableName, carTableName);
+	t1.createTable();
+	c1.createTable();
 	Interface i1;
 	User u1;
-	u1.login = "db79";
-	u1.id = 2;
-	//t1.get_id_from_login(u1.login, u1.id);
-	//i1.profile(t1,c1, u1);
+
+	string login;
+	string name;
+	int d{};
+	int l{};
+	int r{};
+	i1.welcome();
+	while (true)
+	{
+		d = i1.log_reg();
+		if (d == 1)
+		{
+			l = i1.preLog(login);
+			if (l == 1)
+			{
+				i1.log(t1, u1, login);
+				break;
+			}
+			else
+			{
+				continue;
+			}
+		}
+		else if (d == 2)
+		{
+			r = i1.preReg(name);
+			if (r == 1)
+			{
+				i1.reg(t1, u1, name);
+				break;
+			}
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	t1.getIDfromLogin(u1.login, u1.id, u1.balance);
 	i1.menu(t1,c1,u1);
-	//c1.read_from_table_TEST();
-	double price{};
-	price = c1.getPriceFromTableRow(1);
-	cout << price;
+
 
 	return 0;
-	
-
-	/*
-	Table t1("users", "Users");
-	Table c1("cars03", "Cars");
-	t1.create_table();
-	c1.create_table();
-	Interface i1;
-	i1.welcome();
-	int d = i1.log_reg();
-	User u1;
-	if (d == 1)			//1 - logowanie, 2 - rejestracja, 3 - wyjscie
-	{
-		i1.log(t1, u1);
-	}
-	else if(d == 2)
-	{
-		i1.reg(t1,u1);
-		i1.log(t1,u1);
-	}
-	else if(d == 3)
-	{
-		return 0;
-	}
-	t1.get_id_from_login(u1.login, u1.id);
-	i1.menu(t1,c1,u1);
-
-
-	//Table t2("cars", "Cars");
-	//t2.create_table();
-	//t1.car_add_row("Ford", "Focus", "2010", "178000", "Hatchback");
-	
-
-	*/
-
-	
-
-		
 }
-//Przerobvienie funkcji get_price
-//Zabezpieczenie zeby nie bylo mozliwe kupienie swojego wlasnego samochodu
+//Przerobienie funkcji get_price
 //Dopisanie srodkow na koncie do bazy danych 
 //Usuniecie ogloszenia
 //Usuniecie calkowite samochodu z serwisu
