@@ -60,9 +60,7 @@ int main()
 
 
 	return 0;
-}
-//Przerobienie funkcji get_price
-//Dopisanie srodkow na koncie do bazy danych 
+} 
 //Usuniecie ogloszenia
 //Usuniecie calkowite samochodu z serwisu
 //Upiekszenie kodu
@@ -70,7 +68,7 @@ int main()
 
 //Legenda jesli mozna to tak nazwac:
 
-//Dane uzytkownika ktorego wpisalem do testow
+//Dane uzytkownika ktorych uzywalem
 //login: mb307, haslo: test
 //login db79 haslo: test
 
