@@ -34,27 +34,20 @@ int Interface::log_reg()
 	}
 }
 
-int Interface::preLog(string& log)
-{
-	cout << "Jezeli chcesz przerwac wpisz w pierwszym wierszu [0 + ENTER]" << endl;
-	cout << "Wpisz login: ";
-	cin >> log;
-	if (log == "0")
-	{
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
-}
-
-int Interface::log(Table &t, User &u, string &login)
+int Interface::log(Table &t, User &u)
 {
 	string pass;
+	string login;
 	
 	while (true)
 	{
+		cout << "Jezeli chcesz przerwac wpisz w pierwszym wierszu [0 + ENTER]" << endl;
+		cout << "Wpisz login: ";
+		cin >> login;
+		if (login == "0")
+		{
+			return 0;
+		}
 		cout << "Wpisz haslo: ";
 		cin >> pass;
 		if (t.loginCheck(login, pass) == true)
@@ -66,12 +59,14 @@ int Interface::log(Table &t, User &u, string &login)
 	}
 	u.login = login;
 	Sleep(3000);
-	return 1;
+	return 4;
 
 }
 
-int Interface::preReg(string& name)
+int Interface::reg(Table &t, User &u)
 {
+	string name,surname, log, email, password;
+	string balance = "0";
 	cout << "Jezeli chcesz przerwac wpisz w pierwszym wierszu [0 + ENTER]" << endl;
 	cout << "Podaj imie: ";
 	cin >> name;
@@ -79,16 +74,6 @@ int Interface::preReg(string& name)
 	{
 		return 0;
 	}
-	else
-	{
-		return 1;
-	}
-}
-
-int Interface::reg(Table &t, User &u, string &name)
-{
-	string surname, log, email, password;
-	string balance = "0";
 	cout << "Podaj nazwisko: ";
 	cin >> surname;
 	cout << "Podaj login: ";
@@ -104,7 +89,7 @@ int Interface::reg(Table &t, User &u, string &name)
 	{
 		cout << "Zarejestrowano w systemie!" << endl;
 	}
-	else if (a == 2)
+	if (a == 2)
 	{
 		while (true)
 		{
@@ -119,7 +104,7 @@ int Interface::reg(Table &t, User &u, string &name)
 			system("cls");
 		}
 	}
-	else if (a == 3)
+	if (a == 3)
 	{
 		while (true)
 		{
@@ -135,12 +120,12 @@ int Interface::reg(Table &t, User &u, string &name)
 		}
 	}
 	u.login = log;
-
+	cout << "Zarejestrowano w systemie!" << endl;
 	Sleep(3000);
-	return 1;
+	return 4;
 }
 
-int Interface::addCar(Table& t, Table& c, User& u)
+int Interface::addCar(Table& t, Car& c, User& u)
 {
 	char decision;
 	string make{}, model{}, year{}, mileage{}, body{};
@@ -164,19 +149,51 @@ int Interface::addCar(Table& t, Table& c, User& u)
 	string forSale = "0";
 	string price = "0";
 	string id = to_string(u.id);
-	c.carAddRow(id, make, model, year, mileage, body, price, forSale);
+	c.carcarAddRow(id, make, model, year, mileage, body, price, forSale);
 	Sleep(3000);
 	return 0;
 }
 
-int Interface::addCarForSale(Table& t, Table& c, User& u)
+int Interface::deleteCar(Table& t, Car& c, User& u)
+{
+	int decision{};
+	system("cls");
+	cout << "Jezeli chcesz przerwac wpisz [0 + ENTER]" << endl;
+	cout << "Wybierz pojazd, ktory chcesz usunac [ID + ENTER]" << endl;
+	cout << "Twoje pojazdy:\n";
+	c.carreadFromTable(u, "co");
+	cin >> decision;
+	if (decision == 0)
+	{
+		return 0;
+	}
+	else
+	{
+		bool check = c.carcheckIfOwnedCar(u, decision);
+		if (!check)
+		{
+			c.cardeleteRow(decision);
+		}
+		else
+		{
+			cout << "Nieprawidlowa wartosc!" << endl;
+		}
+		Sleep(5000);
+
+
+		return 0;
+	}
+
+}
+
+int Interface::addCarForSale(Table& t, Car& c, User& u)
 {
 	int carID;
 	double price;
 	system("cls");
 	cout << "Wyjscie [0 + ENTER]" << endl;
-	cout << "Wyberz ktory pojazd chcesz chcesz wystawic na sprzedaz [NUMER + ENTER]" << endl;
-	c.readFromTable(u, "co");
+	cout << "Wyberz ktory pojazd chcesz chcesz wystawic na sprzedaz [NUMER + ENTER]" << endl << endl;
+	c.carreadFromTable(u, "co");
 	cin >> carID;
 	if (carID == 0)
 	{
@@ -184,21 +201,21 @@ int Interface::addCarForSale(Table& t, Table& c, User& u)
 	}
 	cout << "Podaj cene samochodu: ";
 	cin >> price;
-	c.setSaleAndPrice(carID, price);
+	c.carsetSaleAndPrice(carID, price);
 	cout << "Pojazd wystawiony na sprzedaz!" << endl;
 	Sleep(3000);
 	system("cls");
 	return 0;
 }
 
-int Interface::showCars(Table& t, Table& c, User& u)
+int Interface::showCars(Table& t, Car& c, User& u)
 {
 	int decision;
 	char finalDecision;
 	double price;
 	cout << "Jezeli chcesz dokonac zakupu, wpisz: NUMER ID + ENTER. Wyjscie: 0 + ENTER" << endl << endl;
 	cout << "===========" << endl;
-	c.readFromTable(u, "cs");
+	c.carreadFromTable(u, "cs");
 	cout << endl;
 	cin >> decision;
 	if (!decision)
@@ -207,20 +224,24 @@ int Interface::showCars(Table& t, Table& c, User& u)
 	}
 	else
 	{
-		price = c.getPriceOfCar(decision);
+		price = c.cargetPriceOfCar(decision);
 		if (u.balance >= price)
 		{
 			cout << "Czy chcesz potwierdzic zakup? [t/n]";
 			cin >> finalDecision;
 			if (finalDecision == 'T' || finalDecision == 't')
 			{
-				bool check = c.checkIfOwnedCar(u, decision);
+				bool check = c.carcheckIfOwnedCar(u, decision);
 				if (check)
 				{
 					cout << "Dokonano zakupu!";
-					c.swapOwner(u, decision);
+					c.carswapOwner(u, decision);
 					u.balance = -price;
 					Sleep(3000);
+				}
+				else
+				{
+					cout << "To twoj pojazd! Nie mozesz go kupic" << endl;
 				}
 			}
 			else
@@ -240,23 +261,20 @@ int Interface::showCars(Table& t, Table& c, User& u)
 int Interface::deposit(User& u)
 {
 	double dep{};
-	while (true)
+	system("cls");
+	cout << "Wpisz zadana kwote do wplaty: ";
+	cin >> dep;
+	if (dep > 0)
 	{
-		system("cls");
-		cout << "Wpisz zadana kwote do wplaty: ";
-		cin >> dep;
-		if (dep > 0)
-		{
-			u.balance += dep;
-			cout << "Dokonano wplaty. Aktualny stan srodkow: " << u.balance <<"zl"<< endl;
-			Sleep(3000);
-			break;
-		}
-		else
-		{
-			cout << "Nieprawidlowa wartosc!" << endl;
-			Sleep(3000);
-		}
+		u.balance += dep;
+		cout << "Dokonano wplaty. Aktualny stan srodkow: " << u.balance <<"zl"<< endl;
+		Sleep(3000);
+		
+	}
+	else
+	{
+		cout << "Nieprawidlowa wartosc!" << endl;
+		Sleep(3000);
 	}
 	return 0;
 }
@@ -264,34 +282,31 @@ int Interface::deposit(User& u)
 int Interface::withdraw(User& u)
 {
 	double with;
-	while (true)
+	
+	system("cls");
+	cout << "Wpisz kwote jaka chcesz wyplacic: ";
+	cin >> with;
+	if (u.balance > with)
 	{
-		system("cls");
-		cout << "Wpisz kwote jaka chcesz wyplacic: ";
-		cin >> with;
-		if (u.balance > with)
-		{
-			u.balance -= with;
-			cout << "Dokonano wyplaty. Aktualny stan srodkow: " << u.balance << "zl" << endl;
-			Sleep(3000);
-			break;
-		}
-		else
-		{
-			cout << "Nieprawidlowa wartosc!" << endl;
-			Sleep(3000);
-		}
+		u.balance -= with;
+		cout << "Dokonano wyplaty. Aktualny stan srodkow: " << u.balance << "zl" << endl;
+		Sleep(3000);
+	}
+	else
+	{
+		cout << "Nieprawidlowa wartosc!" << endl;
+		Sleep(3000);
 	}
 	return 0;
 }
 
-int Interface::profile(Table &t, Table &c, User& u)
+int Interface::profile(Table &t, Car&c, User& u)
 {
 	int decision{};
 	system("cls");
 	t.readFromTable(u,"u");
 	cout << "Twoje pojazdy:\n";
-	c.readFromTable(u, "cp");
+	c.carreadFromTable(u, "cp");
 	cout << endl;
 	cout << "====================" << endl;
 	cout << endl;
@@ -318,11 +333,11 @@ int Interface::profile(Table &t, Table &c, User& u)
 	}
 	else if (decision == 3)
 	{
-		addCar(t,c,u);
+		addCar(t, c, u);
 	}
 	else if (decision == 4)
 	{
-		
+		deleteCar(t, c, u);
 	}
 	else if (decision == 5)
 	{
@@ -339,7 +354,7 @@ int Interface::profile(Table &t, Table &c, User& u)
 	profile(t, c, u);
 }
 
-int Interface::menu(Table &t,Table &c, User& u)
+int Interface::menu(Table &t, Car&c, User& u)
 {
 	int decision{};
 	while (true)

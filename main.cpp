@@ -1,7 +1,8 @@
 #include <iostream>
 #include "sqlite/sqlite3.h"
 #include <string>
-#include "Table.h"
+//#include "Table.h"
+#include "Car.h"
 #include "User.h"
 #include "Interface.h"
 using namespace std;
@@ -10,45 +11,35 @@ using namespace std;
 
 int main()
 {
-	string userTableName = "Users";
-	string carTableName = "Cars";
-	Table t1(userTableName, userTableName);
-	Table c1(carTableName, carTableName);
+	string nazwa1 = "Cars";
+	string nazwa2 = "Users";
+	Car c1(nazwa1);
+	Table t1(nazwa2);
+	
 	t1.createTable();
-	c1.createTable();
+	c1.carcreateTable();
+	
 	Interface i1;
 	User u1;
 
 	string login;
 	string name;
 	int d{};
-	int l{};
-	int r{};
 	i1.welcome();
 	while (true)
 	{
-		d = i1.log_reg();
+		d = i1.log_reg(); //ekran wyboru: 1 - logowanie, 2 - rejestracja, 3 - wyjscie
 		if (d == 1)
 		{
-			l = i1.preLog(login);
-			if (l == 1)
+			d = i1.log(t1, u1); 
+			if (d == 4) //jesli funckja zwroci 4 to znaczy ze jest okej, jak nie to znaczy ze login lub haslo sa nieprawidlowe
 			{
-				i1.log(t1, u1, login);
 				break;
-			}
-			else
-			{
-				continue;
 			}
 		}
-		else if (d == 2)
+		else if(d == 2)
 		{
-			r = i1.preReg(name);
-			if (r == 1)
-			{
-				i1.reg(t1, u1, name);
-				break;
-			}
+			i1.reg(t1, u1);
 		}
 		else
 		{
@@ -60,20 +51,4 @@ int main()
 
 
 	return 0;
-} 
-//Usuniecie ogloszenia
-//Usuniecie calkowite samochodu z serwisu
-//Upiekszenie kodu
-
-
-//Legenda jesli mozna to tak nazwac:
-
-//Dane uzytkownika ktorych uzywalem
-//login: mb307, haslo: test
-//login db79 haslo: test
-
-//Table - klasa do obslugi zapytan SQL
-//Interface - typowo wyglad, staram sie zeby te funkcjonalnego wykonywala klasa User - niesty troche w siebie wchodza. Chodzi o to ze klasa Interface mam miec tylko funkcje wygladu.
-//User - przekazywanie wszystkiego co uzytkownikiem, pobieranie do bazy danych i przechowywanie atrybutow
-
 
