@@ -52,20 +52,13 @@ int main()
 
 	return 0;
 }
-// Funkcja zakup samochodu zwraca wyjatek!!! Do naprawy
 //Usuniecie ogloszenia
 //Usuniecie calkowite samochodu z serwisu
 //Upiekszenie kodu
 
 
-//Legenda jesli mozna to tak nazwac:
+//Dane jakich uzywalem wczesiej
+//login: mb, haslo: test 
 
-//Dane uzytkownika ktorego wpisalem do testow
-//login: mb307, haslo: test
-//login db79 haslo: test
-
-//Table - klasa do obslugi zapytan SQL
-//Interface - typowo wyglad, staram sie zeby te funkcjonalnego wykonywala klasa User - niesty troche w siebie wchodza. Chodzi o to ze klasa Interface mam miec tylko funkcje wygladu.
-//User - przekazywanie wszystkiego co uzytkownikiem, pobieranie do bazy danych i przechowywanie atrybutow
 
 
