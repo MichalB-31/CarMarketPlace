@@ -51,14 +51,4 @@ int main()
 
 
 	return 0;
-}
-//Usuniecie ogloszenia
-//Usuniecie calkowite samochodu z serwisu
-//Upiekszenie kodu
-
-
-//Dane jakich uzywalem wczesiej
-//login: mb, haslo: test 
-
-
 
