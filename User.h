@@ -6,21 +6,13 @@
 using namespace std;
 
 
-class User //klasa ktora ma zapisac dane uzytkownika i je wrzucic do tabeli, mysle ze bedzie tu mocne polaczenie z klasa Table
+class User //klasa uzytkownika ktora posiada login, dzieki ktoremu mozliwe jest uzyskanie ID oraz balance i przypisanie ich do atrybutow tutaj
 {
-private:
-	
 public:
 	int id;
-	//string name;
-	//string surname;
 	string login;
-	//string email;
 	double balance = 0;
-
 	friend class Table;
-	
-	//void collect(Table &t);
 };
 
 

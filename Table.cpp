@@ -1,10 +1,9 @@
 #include "Table.h"
 
 
-Table::Table(string &name, string &whichTab)
+Table::Table(string &name)
 {
 	this->tableName = name;
-	this->whichTable = whichTab;
 }
 
 int callbackUser(void* data, int argc, char** argv, char** azColName)
@@ -17,38 +16,6 @@ int callbackUser(void* data, int argc, char** argv, char** azColName)
 	cout << "Adres email: " << argv[5] << endl;
 
 	cout << endl;
-	return 0;
-}
-
-int callbackSale(void* data, int argc, char** argv, char** azColName)
-{
-	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej 
-	cout << "ID Pojazdu: " << argv[0] << endl;
-	cout << argv[2] << " " << argv[3] << " rok " << argv[4] << endl;
-	cout << "Przebieg: " << argv[5] << "km , nadwozie " << argv[6] << endl;
-	cout << "Cena: " << argv[7] << " zl" << endl;
-
-	cout << "===========" << endl;
-	return 0;
-}
-
-int callbackProfile(void* data, int argc, char** argv, char** azColName)
-{
-	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej 
-	cout << argv[2];
-	cout << " ";
-	cout << argv[3];
-	cout << ", rok ";
-	cout << argv[4];
-
-	cout << endl;
-	return 0;
-}
-
-int callbackPrice(void* data, int columnCount, char** columnValues, char** columnNames)
-{
-	double* pricePtr = static_cast<double*>(data);
-	*pricePtr = std::stod(columnValues[7]);
 	return 0;
 }
 
@@ -69,11 +36,7 @@ int Table::createTable()
 		return result;
 	}
 
-	string createTableSQL;
-	//Instrukcje SQL do stworzenia nowej tabeli
-	if (whichTable == "Users") 
-	{
-		createTableSQL = "CREATE TABLE IF NOT EXISTS " + this->tableName + "("
+	string createTableSQL = "CREATE TABLE IF NOT EXISTS " + this->tableName + "("
 			"ID INTEGER PRIMARY KEY AUTOINCREMENT,"
 			"Name TEXT NOT NULL,"
 			"Surname TEXT NOT NULL,"
@@ -81,21 +44,7 @@ int Table::createTable()
 			"Password TEXT NOT NULL,"
 			"Email TEXT NOT NULL,"
 			"Balance DOUBLE NOT NULL)";
-	}
-	else //Tabela dla pojazdow
-	{
-		createTableSQL = "CREATE TABLE IF NOT EXISTS " + this->tableName + "("
-			"ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-			"OwnerID INTEGER NOT NULL,"
-			"Make TEXT NOT NULL,"
-			"Model TEXT NOT NULL,"
-			"Year TEXT NOT NULL,"
-			"Mileage TEXT NOT NULL,"
-			"Body TEXT NOT NULL,"
-			"Price INTEGER NOT NULL,"
-			"ForSale INTEGER NOT NULL)";
-	}
-	//Wykonanie kodu SQL
+
 	result = sqlite3_exec(db, createTableSQL.c_str(), nullptr, nullptr, &err);
 	if (result != SQLITE_OK) {
 		cout << "Blad: " << err << endl;
@@ -107,7 +56,7 @@ int Table::createTable()
 	sqlite3_close(db);
 }
 
-int Table::readFromTable(User& u, string type)// type u - uzytkownik, cp - carprofile, cs - carsale, co - cars owned
+int Table::readFromTable(User& u, string type)
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -120,23 +69,9 @@ int Table::readFromTable(User& u, string type)// type u - uzytkownik, cp - carpr
 		return result;
 	}
 
-	string selectSQL;
-	if (type == "u")
-	{
-		selectSQL = "SELECT * FROM " + tableName + " WHERE ID = " + to_string(u.id) + "; ";
-		result = sqlite3_exec(db, selectSQL.c_str(), callbackUser, nullptr, &err);
-	}
-	else if (type == "cp")
-	{
-		selectSQL = "SELECT * FROM " + tableName + " WHERE OwnerID = " + to_string(u.id) + "; ";
-		result = sqlite3_exec(db, selectSQL.c_str(), callbackProfile, nullptr, &err);
-	}
-	else if (type == "cs")
-	{
-		selectSQL = "SELECT * FROM " + tableName + " WHERE ForSale = 1;";
-		result = sqlite3_exec(db, selectSQL.c_str(), callbackSale, nullptr, &err);
-	}
-
+	string selectSQL = "SELECT * FROM " + tableName + " WHERE ID = " + to_string(u.id) + "; ";
+	result = sqlite3_exec(db, selectSQL.c_str(), callbackUser, nullptr, &err);
+	
 	if (result != SQLITE_OK)
 	{
 		cout << "Blad: " << err << endl;
@@ -267,55 +202,7 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	return 1;
 }
 
-int Table::carAddRow(string &ownerID, string &make, string &model, string &year, string &mileage, string &body, string &price, string &forSale)
-{
-	sqlite3* db;
-	sqlite3_stmt* stmt;
-
-	string file_name = "CarMarket.db";
-	int result = sqlite3_open(file_name.c_str(), &db);
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
-		return result;
-	}
-
-	// Dodanie wiersza jesli nie ma takiego uzytkownika
-	string insertSQL = "INSERT INTO " + tableName + " (OwnerID, Make, Model, Year, Mileage, Body, Price, ForSale) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-	result = sqlite3_prepare_v2(db, insertSQL.c_str(), -1, &stmt, nullptr);
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
-		sqlite3_close(db);
-		return result;
-	}
-
-	// Ustawienie parametrów z danymi
-	result = sqlite3_bind_text(stmt, 1, ownerID.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 2, make.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 3, model.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 4, year.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 5, mileage.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 6, body.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 7, price.c_str(), -1, SQLITE_STATIC);
-	result = sqlite3_bind_text(stmt, 8, forSale.c_str(), -1, SQLITE_STATIC);
-
-
-	// Wykonanie zapytania
-	result = sqlite3_step(stmt);
-	if (result != SQLITE_DONE)
-	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
-		sqlite3_finalize(stmt);
-		sqlite3_close(db);
-		return result;
-	}
-	sqlite3_finalize(stmt);
-	sqlite3_close(db);
-	return 1;
-}
-
-int Table::deleteRow(string &id)
+int Table::deleteRow(int &id)
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -328,7 +215,7 @@ int Table::deleteRow(string &id)
 		return result;
 	}
 
-	string deleteSQL = "DELETE FROM " + this->tableName + " WHERE ID = "+ id +"; ";
+	string deleteSQL = "DELETE FROM " + this->tableName + " WHERE ID = "+ to_string(id) +"; ";
 
 	result = sqlite3_exec(db, deleteSQL.c_str(), nullptr, nullptr, &err);
 	if (result != SQLITE_OK)
@@ -341,153 +228,6 @@ int Table::deleteRow(string &id)
 	//Zamkniecie bazy danych
 	sqlite3_close(db);
 
-	cout << "Pojazd usunito pomyœnie!" << endl;
-}
-
-int Table::setSaleAndPrice(int& id, double& price)
-{
-	sqlite3* db;
-	char* err = nullptr;
-
-	string file_name = "CarMarket.db";
-	int result = sqlite3_open(file_name.c_str(), &db);
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
-		return result;
-	}
-
-	string selectSQL = "UPDATE " + tableName + " SET Price = " + to_string(price) + ", ForSale = 1 " + " WHERE ID = " + to_string(id) + "; ";
-	result = sqlite3_exec(db, selectSQL.c_str(), nullptr, nullptr, &err);
-
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad:" << err << endl;
-		sqlite3_free(err);
-		return result;
-	}
-	sqlite3_close(db);
-}
-
-int Table::swapOwner(User& u, int& id)
-{
-	sqlite3* db;
-	char* err = nullptr;
-
-	string file_name = "CarMarket.db";
-	int result = sqlite3_open(file_name.c_str(), &db);
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
-		return result;
-	}
-
-	string selectSQL = "UPDATE " + tableName + " SET OwnerID = " + to_string(u.id) + " WHERE ID = " + to_string(id) + "; ";
-	result = sqlite3_exec(db, selectSQL.c_str(), nullptr, nullptr, &err);
-
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad:" << err << endl;
-		sqlite3_free(err);
-		return result;
-	}
-}
-
-int Table::showCarsForSale()
-{
-	sqlite3* db;
-	char* err = nullptr;
-
-	string file_name = "CarMarket.db";
-	int result = sqlite3_open(file_name.c_str(), &db);
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
-		return result;
-	}
-
-	string selectSQL = "SELECT * FROM " + tableName + " WHERE ForSale = 1;";
-	result = sqlite3_exec(db, selectSQL.c_str(), callbackSale, nullptr, &err);
-
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad: " << err << endl;
-		sqlite3_free(err);
-		return result;
-	}
-
-	sqlite3_close(db);
-}
-
-double Table::getPriceOfCar(int& id) //do zmodyfikowania
-{
-	double price = 0.0;
-
-	sqlite3* db;
-	char* err = nullptr;
-
-	string file_name = "CarMarket.db";
-	int result = sqlite3_open(file_name.c_str(), &db);
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
-		return result;
-	}
-
-	string selectSQL = "SELECT * FROM " + tableName + " WHERE ID = " + to_string(id) + ";";
-
-
-	result = sqlite3_exec(db, selectSQL.c_str(), callbackPrice, nullptr, &err);
-
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
-	}
-	return price;
-}
-
-bool Table::checkIfOwnedCar(User& u, int id)
-{
-	sqlite3* db;
-	char* err = nullptr;
-
-	string file_name = "CarMarket.db";
-	int result = sqlite3_open(file_name.c_str(), &db);
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
-		return false;
-	}
-
-	string selectSQL = "SELECT * FROM " + tableName + " WHERE ID = ? AND OwnerID = ?;";
-	sqlite3_stmt* stmt;
-	result = sqlite3_prepare_v2(db, selectSQL.c_str(), -1, &stmt, nullptr);
-	if (result != SQLITE_OK)
-	{
-		cout << "Blad podczas przygotowywania zapytania: " << sqlite3_errmsg(db) << endl;
-		sqlite3_close(db);
-		return false;
-	}
-
-	sqlite3_bind_int(stmt, 1, id);
-	sqlite3_bind_int(stmt, 2, u.id);
-
-	result = sqlite3_step(stmt);
-	if (result == SQLITE_ROW)
-	{
-		cout << "To Twoj pojazd! Nie mozesz go zakupic." << endl;
-		sqlite3_finalize(stmt);
-		sqlite3_close(db);
-		return false;
-	}
-	else
-	{
-		cout << "Error executing SQL statement: " << sqlite3_errmsg(db) << endl;
-	}
-
-	sqlite3_finalize(stmt);
-	sqlite3_close(db);
-	return false;
 }
 
 bool Table::loginCheck(string& username, const string& password)
