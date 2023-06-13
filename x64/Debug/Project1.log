@@ -1,0 +1,20 @@
+﻿  Car.cpp
+  Interface.cpp
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Interface.cpp(27,12): warning C4101: "decision": lokalna zmienna, do której nie istnieje odwołanie
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Interface.cpp(388,13): warning C4101: "decision": lokalna zmienna, do której nie istnieje odwołanie
+  Table.cpp
+  User.cpp
+  main.cpp
+  Generowanie kodu...
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Table.cpp(231): warning C4715: "Table::deleteRow”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Table.cpp(57): warning C4715: "Table::createTable”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Table.cpp(82): warning C4715: "Table::readFromTable”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Interface.cpp(355): warning C4715: "Interface::profile”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Car.cpp(43): warning C4715: "Car::carcreateTable”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Car.cpp(197): warning C4715: "Car::cardeleteRow”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Car.cpp(222): warning C4715: "Car::carsetSaleAndPrice”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Car.cpp(126): warning C4715: "Car::carreadFromTable”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Car.cpp(247): warning C4715: "Car::carswapOwner”: niewszystkie ścieżki kodu zwracają wartość
+C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\Car.cpp(273): warning C4715: "Car::carshowCarsForSale”: niewszystkie ścieżki kodu zwracają wartość
+LINK : warning LNK4067: niejednoznaczny punkt wejścia; wybrano "mainCRTStartup"
+  Project1.vcxproj -> C:\Users\mbarc\Desktop\ProjectSQL\CarMarketPlace\x64\Debug\Project1.exe
