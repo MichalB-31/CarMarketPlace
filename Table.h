@@ -14,15 +14,15 @@ public:
 	friend class User;
 	Table(string &name);   
 
-	//Funkcja do odczytania dancyh z tabeli:
-	friend int callbackUser(void* data, int argc, char** argv, char** azColName); 
-
 	int createTable();			 //stworzenie tabeli
 	int readFromTable(User &u, string type); //odczytanie danych z tabeli na profilu
 	int addRow(string &name, string &surname, string &login,string &password, string &email, string &balance); //dodanie uzytkownika
 	int deleteRow(int &id);	  //usuniecie yztkownika
 	bool loginCheck(string& username, const string& password); //sprawdzenie czy podane login i haslo do siebie pasuja 
 	int getIDfromLogin(string& login, int& id, double& balance); //dopisania ID oraz srodkow na kocie na podstawie loginu do atrybutow obiektu User tak zeby bylo latwo potem odczytywac
+
+	int updateBalance(User& u, double sale = 0, int id = 0, string type = "deposit"); //funkcja zmieniajaca stan salda, domyslne parametry sa uzywane przy zwyklej wplacie, zostaja zmienione automatycznie
+																					  //przy sprzedazy samochodu
 };
 
 
