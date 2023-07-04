@@ -15,7 +15,7 @@ int main()
 	Table t1(nazwa2);
 
 	t1.createTable();
-	c1.carcreateTable();
+	c1.carCreateTable();
 
 	Interface i1;
 	User u1;
@@ -50,7 +50,7 @@ int main()
 				return 0;
 			}
 		}
-		t1.getIDfromLogin(u1.login, u1.id, u1.balance);
+		t1.getIDandBalanceFromLogin(u1.login, u1.id, u1.balance);
 		m = i1.menu(t1, c1, u1);
 		if (m == 0)
 		{

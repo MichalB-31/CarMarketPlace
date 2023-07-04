@@ -5,20 +5,18 @@ Car::Car(string& name)
 	this->tableName = name;
 }
 
-int Car::carcreateTable()
+int Car::carCreateTable()
 {
-	//funkcja tworzaca nowa tabele jesli jeszcze jej nie ma
-
-	sqlite3* db; //wskaünik z biblioteki potrzebny do bazy danych
-	char* err = nullptr; //wskaznik na blad gdyby cos bylo nie tak
+	sqlite3* db; 
+	char* err = nullptr; 
 
 
 	//Stworzenie lub otwarcie bazy danych:
-	string file_name = "CarMarketCars.db";     //stworzenie odpowiedniego stringa ktora bedzie potrzebny do otwarcia bazy danych
-	int result = sqlite3_open(file_name.c_str(), &db); //c_str() sie powtarza w kodzie bo funkcje z bibilioteki wymagaja uzycia typu char a nie string
+	string file_name = "CarMarketCars.db";    
+	int result = sqlite3_open(file_name.c_str(), &db); 
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych:" << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji:" << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
@@ -35,7 +33,7 @@ int Car::carcreateTable()
 
 	result = sqlite3_exec(db, createTableSQL.c_str(), nullptr, nullptr, &err);
 	if (result != SQLITE_OK) {
-		cout << "Blad: " << err << endl;
+		cout << "Blad aplikacji: " << err << endl;
 		sqlite3_free(err);
 		return result;
 	}
@@ -46,54 +44,55 @@ int Car::carcreateTable()
 int carcallbackSale(void* data, int argc, char** argv, char** azColName)
 {
 	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej
-	cout << "ID Pojazdu: " << argv[0] << endl;
-	cout << argv[2] << " " << argv[3] << " rok " << argv[4] << endl;
-	cout << "Przebieg: " << argv[5] << "km , nadwozie " << argv[6] << endl;
-	cout << "Cena: " << argv[7] << " zl" << endl;
-
-	cout << "===========" << endl;
+	cout << "  ___________" << endl;
+	cout << " | ID Pojazdu: " << argv[0] << endl;
+	cout << " | " << argv[2] << " " << argv[3] << " rok " << argv[4] << endl;
+	cout << " | Przebieg: " << argv[5] << "km , nadwozie " << argv[6] << endl;
+	cout << " | Cena: " << argv[7] << " zl" << endl;
+	cout << " |___________" << endl;
 	return 0;
 }
 
 int carcallbackSetSale(void* data, int argc, char** argv, char** azColName)
 {
 	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej
-	cout << "ID Pojazdu: " << argv[0] << endl;
-	cout << argv[2] << " " << argv[3] << " rok " << argv[4] << endl;
-	cout << "Przebieg: " << argv[5] << "km , nadwozie " << argv[6] << endl;
-
-	cout << "===========" << endl;
+	cout << "  ___________" << endl;
+	cout << " |ID Pojazdu: " << argv[0] << endl;
+	cout << " |" << argv[2] << " " << argv[3] << " rok " << argv[4] << endl;
+	cout << " | Przebieg: " << argv[5] << "km , nadwozie " << argv[6] << endl;
+	cout << " |___________" << endl;
 	return 0;
 }
 
-int carcallbackPrice(void* data, int columnCount, char** columnValues, char** columnNames)
+int carcallbackPrice(void* data, int columnCount, char** argv, char** azColName)
 {
 	double* pricePtr = static_cast<double*>(data);
-	*pricePtr = stod(columnValues[7]);
+	*pricePtr = stod(argv[7]);
 	return 0;
 }
 
-int carcallbackOwnerID(void* data, int columnCount, char** columnValues, char** columnNames)
+int carcallbackOwnerID(void* data, int columnCount, char** argv, char** azColName)
 {
 	int* ownerIdPtr = static_cast<int*>(data);
-	*ownerIdPtr = stoi(columnValues[1]);
+	*ownerIdPtr = stoi(argv[1]);
 	return 0;
 }
 
 int carcallbackProfile(void* data, int argc, char** argv, char** azColName)
 {
 	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej
-	cout << argv[2];
+	cout << "  ______________________" << endl;
+	cout << " | " << argv[2];
 	cout << " ";
 	cout << argv[3];
 	cout << ", rok ";
 	cout << argv[4];
-
 	cout << endl;
+	cout<<  " |______________________"<<endl;
 	return 0;
 }
 
-int Car::carreadFromTable(User& u, string type)// cp - carprofile, cs - carsale, co - cars owned
+int Car::carReadFromTable(User& u, string type)// cp - carprofile, cs - carsale, co - cars owned
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -107,22 +106,22 @@ int Car::carreadFromTable(User& u, string type)// cp - carprofile, cs - carsale,
 	}
 
 	string selectSQL;
-	if (type == "cp")
+	if (type == "cp") //profil
 	{
 		selectSQL = "SELECT * FROM " + tableName + " WHERE OwnerID = " + to_string(u.id) + "; ";
 		result = sqlite3_exec(db, selectSQL.c_str(), carcallbackProfile, nullptr, &err);
 	}
-	else if (type == "cs")
+	else if (type == "cs") //sprzedaz
 	{
 		selectSQL = "SELECT * FROM " + tableName + " WHERE ForSale = 1;";
 		result = sqlite3_exec(db, selectSQL.c_str(), carcallbackSale, nullptr, &err);
 	}
-	else if (type == "co")
+	else if (type == "co") //samochody do wystawienia na sprzedaz 
 	{
 		selectSQL = "SELECT * FROM " + tableName + " WHERE OwnerID = " + to_string(u.id) + "; ";
 		result = sqlite3_exec(db, selectSQL.c_str(), carcallbackSetSale, nullptr, &err);
 	}
-	else if (type == "cd")
+	else if (type == "cd") //samochody co sa juz wystawione na sprzedaz
 	{
 		selectSQL = "SELECT * FROM " + tableName + " WHERE OwnerID = " + to_string(u.id) + " AND ForSale = 1; ";
 		result = sqlite3_exec(db, selectSQL.c_str(), carcallbackSale, nullptr, &err);
@@ -130,7 +129,7 @@ int Car::carreadFromTable(User& u, string type)// cp - carprofile, cs - carsale,
 
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << err << endl;
+		cout << "Blad aplikacji: " << err << endl;
 		sqlite3_free(err);
 		return result;
 	}
@@ -138,7 +137,7 @@ int Car::carreadFromTable(User& u, string type)// cp - carprofile, cs - carsale,
 	return 0;
 }
 
-int Car::carcarAddRow(string& ownerID, string& make, string& model, string& year, string& mileage, string& body, string& price, string& forSale)
+int Car::carAddRow(string& ownerID, string& make, string& model, string& year, string& mileage, string& body, string& price, string& forSale)
 {
 	sqlite3* db;
 	sqlite3_stmt* stmt;
@@ -147,16 +146,15 @@ int Car::carcarAddRow(string& ownerID, string& make, string& model, string& year
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
-	// Dodanie wiersza jesli nie ma takiego uzytkownika
 	string insertSQL = "INSERT INTO " + tableName + " (OwnerID, Make, Model, Year, Mileage, Body, Price, ForSale) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 	result = sqlite3_prepare_v2(db, insertSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return result;
 	}
@@ -174,7 +172,7 @@ int Car::carcarAddRow(string& ownerID, string& make, string& model, string& year
 	result = sqlite3_step(stmt);
 	if (result != SQLITE_DONE)
 	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
@@ -184,7 +182,7 @@ int Car::carcarAddRow(string& ownerID, string& make, string& model, string& year
 	return 1;
 }
 
-int Car::cardeleteRow(int& id)
+int Car::carDeleteRow(int& id)
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -193,7 +191,7 @@ int Car::cardeleteRow(int& id)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
@@ -202,7 +200,7 @@ int Car::cardeleteRow(int& id)
 	result = sqlite3_exec(db, deleteSQL.c_str(), nullptr, nullptr, &err);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << err << endl;
+		cout << "Blad aplikacji : " << err << endl;
 		sqlite3_free(err);
 		return result;
 	}
@@ -210,7 +208,7 @@ int Car::cardeleteRow(int& id)
 	return 0;
 }
 
-int Car::carsetSaleAndPrice(int& id, double& price)
+int Car::carSetSaleAndPrice(int& id, double& price)
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -219,7 +217,7 @@ int Car::carsetSaleAndPrice(int& id, double& price)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
@@ -228,7 +226,7 @@ int Car::carsetSaleAndPrice(int& id, double& price)
 
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad:" << err << endl;
+		cout << "Blad aplikacji:" << err << endl;
 		sqlite3_free(err);
 		return result;
 	}
@@ -236,7 +234,7 @@ int Car::carsetSaleAndPrice(int& id, double& price)
 	return 0;
 }
 
-int Car::carswapOwner(User& u, int& id)
+int Car::carSwapOwner(User& u, int& id)
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -245,17 +243,16 @@ int Car::carswapOwner(User& u, int& id)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
-	string selectSQL = "UPDATE " + tableName + " SET OwnerID = " + to_string(u.id) + ", ForSale = 0 WHERE ID = " + to_string(id) + "; ";
-	cout << "SQL Statement: " << selectSQL << endl; // Print the SQL statement for debugging purposes
+	string updateSQL = "UPDATE " + tableName + " SET OwnerID = " + to_string(u.id) + ", ForSale = 0 WHERE ID = " + to_string(id) + "; ";
 
-	result = sqlite3_exec(db, selectSQL.c_str(), nullptr, nullptr, &err);
+	result = sqlite3_exec(db, updateSQL.c_str(), nullptr, nullptr, &err);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << err << endl;
+		cout << "Blad aplikacji: " << err << endl;
 		sqlite3_free(err);
 		sqlite3_close(db);
 		return result;
@@ -265,7 +262,7 @@ int Car::carswapOwner(User& u, int& id)
 	return 0;
 }
 
-int Car::carshowCarsForSale()
+int Car::carShowCarsForSale()
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -274,7 +271,7 @@ int Car::carshowCarsForSale()
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
@@ -283,7 +280,7 @@ int Car::carshowCarsForSale()
 
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << err << endl;
+		cout << "Blad aplikacji: " << err << endl;
 		sqlite3_free(err);
 		return result;
 	}
@@ -292,7 +289,7 @@ int Car::carshowCarsForSale()
 	return 0;
 }
 
-double Car::cargetPriceOfCar(int& id)
+double Car::carGetPriceOfCar(int& id)
 {
 	double price = 0.0;
 
@@ -303,7 +300,7 @@ double Car::cargetPriceOfCar(int& id)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
@@ -313,7 +310,7 @@ double Car::cargetPriceOfCar(int& id)
 
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 	}
 
 	sqlite3_close(db);
@@ -321,7 +318,7 @@ double Car::cargetPriceOfCar(int& id)
 	return price;
 }
 
-bool Car::carcheckIfOwnedCar(User& u, int id)
+bool Car::carCheckIfOwnedCar(User& u, int id)
 {
 	sqlite3* db;
 	char* err = nullptr;
@@ -330,7 +327,7 @@ bool Car::carcheckIfOwnedCar(User& u, int id)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl; 
+		cout << "Blad aplikacji " << sqlite3_errmsg(db) << endl; 
 		sqlite3_close(db);
 		return false;
 	}
@@ -340,14 +337,10 @@ bool Car::carcheckIfOwnedCar(User& u, int id)
 	result = sqlite3_prepare_v2(db, selectSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas przygotowywania zapytania: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return false;
 	}
-
-
-	//sqlite3_bind_int(stmt, 1, id);
-	//sqlite3_bind_int(stmt, 2, u.id);
 
 	result = sqlite3_step(stmt);
 	if (result == SQLITE_ROW)
@@ -372,7 +365,7 @@ int Car::carGetIdOfOwnerCar(int &id)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return result;
 	}
@@ -383,7 +376,7 @@ int Car::carGetIdOfOwnerCar(int &id)
 
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 	}
 
@@ -401,16 +394,16 @@ int Car::carDeleteForSale(int& id)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		return result;
 	}
 
-	string selectSQL = "UPDATE " + tableName + " SET ForSale = 0 WHERE ID = " + to_string(id) + "; ";
+	string deleteSQL = "UPDATE " + tableName + " SET ForSale = 0 WHERE ID = " + to_string(id) + "; ";
 
-	result = sqlite3_exec(db, selectSQL.c_str(), nullptr, nullptr, &err);
+	result = sqlite3_exec(db, deleteSQL.c_str(), nullptr, nullptr, &err);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << err << endl;
+		cout << "Blad aplikacji: " << err << endl;
 		sqlite3_free(err);
 		sqlite3_close(db);
 		return result;
@@ -419,3 +412,41 @@ int Car::carDeleteForSale(int& id)
 	sqlite3_close(db);
 	return 0;
 }
+
+int Car::carCheckIfCorrectToBuy(int& id)
+{
+	sqlite3* db;
+	sqlite3_stmt* stmt;
+
+
+	string file_name = "CarMarketCars.db";
+	int result = sqlite3_open(file_name.c_str(), &db);
+	if (result != SQLITE_OK) {
+		cerr << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
+		sqlite3_close(db);
+		return false;
+	}
+
+	string selectSQL = "SELECT * FROM " + this->tableName + " WHERE ID = " + to_string(id) + " ; ";
+	result = sqlite3_prepare_v2(db, selectSQL.c_str(), -1, &stmt, nullptr);
+	if (result != SQLITE_OK) {
+		cerr << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
+		sqlite3_close(db);
+		return false;
+	}
+
+	result = sqlite3_step(stmt);
+	if (result == SQLITE_ROW) 
+	{
+		sqlite3_finalize(stmt);
+		sqlite3_close(db);
+		return true;
+	}
+	else
+	{
+		sqlite3_close(db);
+		Sleep(1000);
+		return false;
+	}
+}
+

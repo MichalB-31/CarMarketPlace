@@ -1,5 +1,4 @@
 #include "Table.h"
-#include <thread>
 
 
 
@@ -11,16 +10,18 @@ Table::Table(string &name)
 int callbackUser(void* data, int argc, char** argv, char** azColName)
 {
 	//Funckja potrzebna do odczytywania danych pobranych z tabeli, uzyta w metodzie z funkcji ponizej 
-	cout << "Twoje dane: " << endl << endl;
-	cout << "Imie: " << argv[1] << endl;
-	cout << "Nazwsiko: " << argv[2] << endl;
-	cout << "Nazwa uzytkownika: " << argv[3] << endl;
-	cout << "Adres email: " << argv[5] << endl;
-	cout << "Dostepne srodki: " << argv[6] << "zl"<< endl;
+	cout << "| Twoje dane: " << endl;
+	cout << "| " << endl;
+	cout << "| Imie: " << argv[1] << endl;
+	cout << "| Nazwsiko: " << argv[2] << endl;
+	cout << "| Nazwa uzytkownika: " << argv[3] << endl;
+	cout << "| Adres email: " << argv[5] << endl;
+	cout << "| Dostepne srodki: " << argv[6] << "zl"<< endl;
+	cout << "|____________" << endl;
 
 	cout << endl;
 	return 0;
-}
+} //funkcja odpowiednio odczytajaca dane z tabeli
 
 int Table::createTable()
 {
@@ -35,7 +36,7 @@ int Table::createTable()
 	int result = sqlite3_open(file_name.c_str(), &db); //c_str() sie powtarza w kodzie bo funkcje z bibilioteki wymagaja uzycia typu char a nie string
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych:" << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return result;
 	}
@@ -51,7 +52,7 @@ int Table::createTable()
 
 	result = sqlite3_exec(db, createTableSQL.c_str(), nullptr, nullptr, &err);
 	if (result != SQLITE_OK) {
-		cout << "Blad: " << err << endl;
+		cout << "Blad aplikacji: " << err << endl;
 		sqlite3_free(err);
 		sqlite3_close(db);
 		return result;
@@ -71,7 +72,7 @@ int Table::readFromTable(User& u, string type)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK) 
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return result;
 	}
@@ -81,7 +82,7 @@ int Table::readFromTable(User& u, string type)
 	
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << err << endl;
+		cout << "Blad aplikacji: " << err << endl;
 		sqlite3_free(err);
 		sqlite3_close(db);
 		return result;
@@ -99,7 +100,7 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return result;
 	}
@@ -109,7 +110,7 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	result = sqlite3_prepare_v2(db, selectSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas przygotowywania zapytania: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return result;
 	}
@@ -118,7 +119,7 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	result = sqlite3_bind_text(stmt, 1, login.c_str(), -1, SQLITE_STATIC);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
@@ -128,25 +129,25 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	result = sqlite3_step(stmt);
 	if (result == SQLITE_ROW)
 	{
-		cout << "Uzytkownik o podanym loginie juz istnieje." << endl;
+		cout << "!!! Uzytkownik o podanym loginie juz istnieje !!!" << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
-		return 2;  
+		return 2;  // wartosc potrzebna do odpowiedniego kierowania interfejsem
 	}
 	else if (result != SQLITE_DONE)
 	{
-		cout << "Blad podczas wykonywania zapytania: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
 	}
 
-
+	//Sprawdzenie czy email jest juz w bazie
 	selectSQL = "SELECT Email FROM " + tableName + " WHERE Email = ?";
 	result = sqlite3_prepare_v2(db, selectSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas przygotowywania zapytania: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return result;
 	}
@@ -155,7 +156,7 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	result = sqlite3_bind_text(stmt, 1, email.c_str(), -1, SQLITE_STATIC);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas ustawiania parametru email: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
@@ -165,19 +166,18 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	result = sqlite3_step(stmt);
 	if (result == SQLITE_ROW)
 	{
-		cout << "Ten adres email jest juz uzywany w serwisie" << endl;
+		cout << "!!! Ten adres email jest juz uzywany w serwisie !!! " << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
-		return 3;
+		return 3; // wartosc potrzebna do odpowiedniego kierowania interfejsem
 	}
 	else if (result != SQLITE_DONE)
 	{
-		cout << "Blad podczas wykonywania zapytania: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
 	}
-
 
 	sqlite3_finalize(stmt);
 
@@ -186,7 +186,7 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	result = sqlite3_prepare_v2(db, insertSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas przygotowywania zapytania: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
@@ -203,7 +203,7 @@ int Table::addRow(string &name, string &surname, string &login, string &password
 	result = sqlite3_step(stmt);
 	if (result != SQLITE_DONE)
 	{
-		cout << "Blad podczas wstawiania wiersza: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
@@ -238,7 +238,6 @@ int Table::deleteRow(int &id)
 		return result;
 	}
 
-	//Zamkniecie bazy danych
 	sqlite3_close(db);
 	return 0;
 }
@@ -252,23 +251,23 @@ bool Table::loginCheck(string& username, const string& password)
 	string file_name = "CarMarket.db";
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK) {
-		cerr << "Error opening database: " << sqlite3_errmsg(db) << endl;
+		cerr << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
+		sqlite3_close(db);
 		return false;
 	}
 
 	//Kod SQL do wybrania loginow i hasel z bazy danych
 	string selectSQL = "SELECT Login, Password FROM " + this->tableName + " WHERE Login = ?;";
-	//Przygotowanie kodu SQL
 	result = sqlite3_prepare_v2(db, selectSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK) {
-		cerr << "Blad: " << sqlite3_errmsg(db) << endl;
+		cerr << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return false;
 	}
 
 	result = sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
 	if (result != SQLITE_OK) {
-		cerr << "Blad: " << sqlite3_errmsg(db) << endl;
+		cerr << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return false;
 	}
@@ -278,22 +277,20 @@ bool Table::loginCheck(string& username, const string& password)
 		// Jesli uzytkownik istnieje to dojdzie do sprawdzenia hasla
 		string storedPassword(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)));
 		if (password == storedPassword) {
-			cout << "Zalogowano!" << endl;
+			cout << ">>> Zalogowano! <<< " << endl;
 			sqlite3_finalize(stmt);
 			sqlite3_close(db);
 			Sleep(1000);
 			return true;
 		}
 		else {
-			cout << "Niepoprawne haslo!" << endl;
-			sqlite3_close(db);
+			cout << "!!! Niepoprawne haslo !!!" << endl;
 			Sleep(1000);
-			return false;
 		}
 	}
 	else 
 	{
-		cout << "Niepoprawna nazwa uzytkownika!" << endl;
+		cout << "!!! Niepoprawna nazwa uzytkownika !!!" << endl;
 		sqlite3_close(db);
 		Sleep(1000);
 		return false;
@@ -303,7 +300,7 @@ bool Table::loginCheck(string& username, const string& password)
 	return false;
 }
 
-int Table::getIDfromLogin(string& login, int& id, double& balance)
+int Table::getIDandBalanceFromLogin(string& login, int& id, double& balance)
 {
 	sqlite3* db;
 	sqlite3_stmt* stmt;
@@ -312,7 +309,8 @@ int Table::getIDfromLogin(string& login, int& id, double& balance)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
+		sqlite3_close(db);
 		return result;
 	}
 
@@ -320,7 +318,7 @@ int Table::getIDfromLogin(string& login, int& id, double& balance)
 	result = sqlite3_prepare_v2(db, selectSQL.c_str(), -1, &stmt, nullptr);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad : " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji : " << sqlite3_errmsg(db) << endl;
 		sqlite3_close(db);
 		return result;
 	}
@@ -328,7 +326,7 @@ int Table::getIDfromLogin(string& login, int& id, double& balance)
 	result = sqlite3_bind_text(stmt, 1, login.c_str(), -1, SQLITE_STATIC);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji : " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
@@ -342,11 +340,11 @@ int Table::getIDfromLogin(string& login, int& id, double& balance)
 	}
 	else if (result == SQLITE_DONE)
 	{
-		cout << "Uzytkownik o podanym loginie nie istnieje." << endl;
+		cout << "!!! Uzytkownik o podanym loginie nie istnieje !!!" << endl;
 	}
 	else
 	{
-		cout << "Blad: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
 		sqlite3_finalize(stmt);
 		sqlite3_close(db);
 		return result;
@@ -367,25 +365,27 @@ int Table::updateBalance(User &u, double sale, int id, string type)
 	int result = sqlite3_open(file_name.c_str(), &db);
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad podczas otwierania bazy danych: " << sqlite3_errmsg(db) << endl;
+		cout << "Blad aplikacji: " << sqlite3_errmsg(db) << endl;
+		sqlite3_close(db);
 		return result;
 	}
-	string selectSQL;
-	double modifiedBalance = u.balance + sale;
+	string updateSQL;
+	double modifiedBalance = u.balance;
+
 	if (type == "deposit")
 	{
-		selectSQL = "UPDATE " + tableName + " SET Balance = " + to_string(modifiedBalance) + " WHERE ID = " + to_string(u.id) + "; ";
+		updateSQL = "UPDATE " + tableName + " SET Balance = " + to_string(modifiedBalance) + " WHERE ID = " + to_string(u.id) + "; ";
 	}
 	else if (type == "sale")
 	{
-		selectSQL = "UPDATE " + tableName + " SET Balance = " + to_string(modifiedBalance) + " WHERE ID = " + to_string(id) + "; ";
+		updateSQL = "UPDATE " + tableName + " SET Balance = Balance + " + to_string(sale) + " WHERE ID = " + to_string(id) + "; ";
 	}
 
-	result = sqlite3_exec(db, selectSQL.c_str(), nullptr, nullptr, &err);
+	result = sqlite3_exec(db, updateSQL.c_str(), nullptr, nullptr, &err);
 
 	if (result != SQLITE_OK)
 	{
-		cout << "Blad:" << err << endl;
+		cout << "Blad aplikacji :" << err << endl;
 		sqlite3_free(err);
 		sqlite3_close(db);
 		return result;
